@@ -1,0 +1,254 @@
+// =====================================================
+// SGMC FREE SYSTEM (Second Life Stable)
+// Google Apps Script = DATA API ONLY (JSON + JSONP)
+// Host the board HTML on a static host (GitHub Pages / Cloudflare Pages)
+// =====================================================
+
+const TOKEN = "CHANGE_THIS_TO_LONG_RANDOM_STRING";
+
+const SHEET_MEMBERS  = "Members";
+const SHEET_PRESENCE = "Presence";
+const SHEET_EVENTS   = "Events";
+
+// ---------------- Utilities ----------------
+
+function nowIso() { return new Date().toISOString(); }
+
+function getSheet_(name) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sh = ss.getSheetByName(name);
+  if (!sh) throw new Error("Missing sheet: " + name);
+  return sh;
+}
+
+function findRowByUuid_(sh, uuid) {
+  const last = sh.getLastRow();
+  if (last < 2) return 0;
+  const values = sh.getRange(2, 1, last - 1, 1).getValues();
+  for (let i = 0; i < values.length; i++) {
+    if (String(values[i][0]) === String(uuid)) return i + 2;
+  }
+  return 0;
+}
+
+function authOk_(e) {
+  const t = (e && e.parameter && e.parameter.token) ? String(e.parameter.token) : "";
+  return t === TOKEN;
+}
+
+function json_(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// JSONP (bypasses CORS; SL-friendly)
+function jsonp_(obj, cb) {
+  cb = String(cb || "");
+  if (!cb || !/^[A-Za-z_$][0-9A-Za-z_$]*$/.test(cb)) cb = "cb";
+  const payload = cb + "(" + JSON.stringify(obj) + ");";
+  return ContentService
+    .createTextOutput(payload)
+    .setMimeType(ContentService.MimeType.JAVASCRIPT);
+}
+
+// ---------------- Core Member Logic ----------------
+
+function upsertMember_(uuid, name) {
+  const sh = getSheet_(SHEET_MEMBERS);
+  const row = findRowByUuid_(sh, uuid);
+  const ts = nowIso();
+
+  if (!row) {
+    sh.appendRow([uuid, name || "", "HANGAROUND", 0, ts, ts]);
+    return;
+  }
+
+  const vals = sh.getRange(row, 1, 1, 6).getValues()[0];
+  sh.getRange(row, 1, 1, 6).setValues([[
+    uuid,
+    name || vals[1],
+    vals[2],
+    Number(vals[3] || 0),
+    vals[4],
+    ts
+  ]]);
+}
+
+function upsertPresence_(uuid, region, x, y, z) {
+  const sh = getSheet_(SHEET_PRESENCE);
+  const row = findRowByUuid_(sh, uuid);
+  const ts = nowIso();
+
+  if (!row) {
+    sh.appendRow([uuid, ts, region || "", x || 0, y || 0, z || 0]);
+    return;
+  }
+  sh.getRange(row, 1, 1, 6).setValues([[uuid, ts, region || "", x || 0, y || 0, z || 0]]);
+}
+
+function addEvent_(uuid, name, kind, delta, note) {
+  const sh = getSheet_(SHEET_EVENTS);
+  sh.appendRow([nowIso(), uuid, name || "", kind || "", Number(delta || 0), note || ""]);
+}
+
+function addPoints_(uuid, delta) {
+  const sh = getSheet_(SHEET_MEMBERS);
+  const row = findRowByUuid_(sh, uuid);
+  if (!row) return;
+
+  const cell = sh.getRange(row, 4);
+  const cur = Number(cell.getValue() || 0);
+  cell.setValue(cur + Number(delta || 0));
+  sh.getRange(row, 6).setValue(nowIso());
+}
+
+function setRole_(uuid, role) {
+  const sh = getSheet_(SHEET_MEMBERS);
+  const row = findRowByUuid_(sh, uuid);
+  if (!row) return;
+
+  sh.getRange(row, 3).setValue(role);
+  sh.getRange(row, 6).setValue(nowIso());
+}
+
+// ---------------- Views ----------------
+
+function roster_() {
+  const mem  = getSheet_(SHEET_MEMBERS);
+  const pres = getSheet_(SHEET_PRESENCE);
+
+  const memRows = mem.getLastRow() < 2 ? [] : mem.getRange(2, 1, mem.getLastRow() - 1, 6).getValues();
+  const presRows = pres.getLastRow() < 2 ? [] : pres.getRange(2, 1, pres.getLastRow() - 1, 6).getValues();
+
+  const presMap = {};
+  presRows.forEach(r => { presMap[String(r[0])] = { region: r[2] || "" }; });
+
+  const order = {
+    "PRESIDENT": 1,
+    "VICE PRESIDENT": 2,
+    "SERGEANT AT ARMS": 3,
+    "ROAD CAPTAIN": 4,
+    "TREASURER": 5,
+    "SECRETARY": 6,
+    "ENFORCER": 7,
+    "FULL PATCH": 8,
+    "PROSPECT": 9,
+    "HANGAROUND": 10
+  };
+
+  const rows = memRows.map(r => {
+    const uuid = String(r[0]);
+    const p = presMap[uuid] || {};
+    return {
+      uuid,
+      name: r[1],
+      role: r[2],
+      points: Number(r[3] || 0),
+      region: p.region || ""
+    };
+  });
+
+  rows.sort((a, b) => {
+    const oa = order[a.role] || 99;
+    const ob = order[b.role] || 99;
+    if (oa !== ob) return oa - ob;
+    return String(a.name || "").localeCompare(String(b.name || ""));
+  });
+
+  return rows;
+}
+
+function leaderboard_(limit) {
+  const mem = getSheet_(SHEET_MEMBERS);
+  const memRows = mem.getLastRow() < 2 ? [] : mem.getRange(2, 1, mem.getLastRow() - 1, 6).getValues();
+
+  const rows = memRows.map(r => ({
+    uuid: String(r[0]),
+    name: r[1],
+    role: r[2],
+    points: Number(r[3] || 0)
+  }));
+
+  rows.sort((a, b) => b.points - a.points);
+  return rows.slice(0, Math.max(1, Math.min(50, Number(limit || 15))));
+}
+
+// ---------------- HUD API (POST) ----------------
+
+function doPost(e) {
+  try {
+    if (!authOk_(e)) return ContentService.createTextOutput("Unauthorized");
+
+    const body = JSON.parse((e.postData && e.postData.contents) ? e.postData.contents : "{}");
+    const action = body.action;
+    const uuid = body.uuid;
+    const name = body.name;
+
+    if (!uuid) return ContentService.createTextOutput("Missing UUID");
+
+    if (action === "heartbeat") {
+      upsertMember_(uuid, name);
+      upsertPresence_(uuid, body.region, body.x, body.y, body.z);
+      addEvent_(uuid, name, "heartbeat", 0, body.region);
+      return ContentService.createTextOutput("OK");
+    }
+
+    if (action === "points") {
+      upsertMember_(uuid, name);
+      addPoints_(uuid, body.delta);
+      addEvent_(uuid, name, "points", body.delta, body.note);
+      return ContentService.createTextOutput("OK");
+    }
+
+    if (action === "role") {
+      upsertMember_(uuid, name);
+      setRole_(uuid, body.role);
+      addEvent_(uuid, name, "role", 0, body.role);
+      return ContentService.createTextOutput("OK");
+    }
+
+    return ContentService.createTextOutput("Unknown action");
+  } catch (err) {
+    return ContentService.createTextOutput(String(err));
+  }
+}
+
+// ---------------- DATA API (GET) ----------------
+// Use JSONP for SL board page.
+
+function doGet(e) {
+  try {
+    const mode = (e && e.parameter && e.parameter.mode) ? String(e.parameter.mode) : "ping";
+    const cb = (e && e.parameter && e.parameter.cb) ? String(e.parameter.cb) : "cb";
+
+    if (mode === "ping") return json_({ ok: true, now: nowIso() });
+
+    if (mode === "roster") {
+      const rows = roster_();
+      return json_({ ok: true, rows });
+    }
+
+    if (mode === "leaderboard") {
+      const limit = Number((e.parameter && e.parameter.limit) || 15);
+      const rows = leaderboard_(limit);
+      return json_({ ok: true, rows });
+    }
+
+    if (mode === "board_jsonp") {
+      const rowsRoster = roster_();
+      const rowsLeader = leaderboard_(15);
+      return jsonp_({ ok: true, now: nowIso(), roster: rowsRoster, leaderboard: rowsLeader }, cb);
+    }
+
+    return json_({ ok: false, error: "Unknown mode" });
+
+  } catch (err) {
+    // Always return something, never blank
+    const cb = (e && e.parameter && e.parameter.cb) ? String(e.parameter.cb) : "cb";
+    if (e && e.parameter && e.parameter.mode === "board_jsonp") {
+      return jsonp_({ ok: false, error: String(err) }, cb);
+    }
+    return json_({ ok: false, error: String(err) });
+  }
+}
