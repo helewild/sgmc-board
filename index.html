@@ -12,7 +12,7 @@
     .row{display:flex;gap:16px;flex-wrap:wrap}
     .card{background:#121212;border:1px solid #2a2a2a;border-radius:12px;padding:12px;min-width:320px;flex:1}
     table{width:100%;border-collapse:collapse}
-    th,td{padding:8px 6px;border-bottom:1px solid #2a2a2a;font-size:13px}
+    th,td{padding:8px 6px;border-bottom:1px solid #2a2a2a;font-size:13px;vertical-align:top}
     th{color:#f0c86a;text-align:left}
     .muted{color:#9a9a9a}
     .err{color:#ffb3b3}
@@ -42,7 +42,12 @@
     <div class="card">
       <div style="font-size:15px;margin-bottom:8px">Ride Outs</div>
       <table id="ridesTbl">
-        <tr><th>Date</th><th>Time</th><th>Title</th><th class="muted">Location</th></tr>
+        <tr>
+          <th>Date</th>
+          <th>Title</th>
+          <th class="muted">Location</th>
+          <th class="muted">Notes</th>
+        </tr>
         <tr><td colspan="4" class="muted">Loading…</td></tr>
       </table>
     </div>
@@ -52,8 +57,7 @@
 </div>
 
 <script>
-  // PUT YOUR /exec URL HERE:
-  var API_EXEC = "https://script.google.com/macros/s/AKfycbzBVmCshhIrFYyOwpAW3tHyM_T1ROZWuYkyorEkHAo4cXfJcaw0ui3ITQnkzLkqXVE3Ww/exec";
+  var API_EXEC = "https://script.google.com/macros/s/PASTE_YOUR_EXEC_ID_HERE/exec";
 
   function esc(s){
     s = String(s==null?"":s);
@@ -69,7 +73,7 @@
     if(!data || !data.ok){
       rosterTbl.innerHTML = '<tr><th>Role</th><th>Name</th><th class="muted">Region</th></tr><tr><td colspan="3" class="err">Error loading</td></tr>';
       leadTbl.innerHTML = '<tr><th>Points</th><th>Name</th><th class="muted">Role</th></tr><tr><td colspan="3" class="err">Error loading</td></tr>';
-      ridesTbl.innerHTML = '<tr><th>Date</th><th>Time</th><th>Title</th><th class="muted">Location</th></tr><tr><td colspan="4" class="err">Error loading</td></tr>';
+      ridesTbl.innerHTML = '<tr><th>Date</th><th>Title</th><th class="muted">Location</th><th class="muted">Notes</th></tr><tr><td colspan="4" class="err">Error loading</td></tr>';
       status.innerHTML = '<span class="err">API error:</span> ' + esc(data && data.error ? data.error : "Unknown");
       return;
     }
@@ -100,13 +104,18 @@
     }
     leadTbl.innerHTML = lHtml;
 
-    var rideHtml = '<tr><th>Date</th><th>Time</th><th>Title</th><th class="muted">Location</th></tr>';
+    var rideHtml = '<tr><th>Date</th><th>Title</th><th class="muted">Location</th><th class="muted">Notes</th></tr>';
     if(rides.length === 0){
       rideHtml += '<tr><td colspan="4" class="muted">No rides scheduled</td></tr>';
     } else {
       for(var k=0;k<rides.length;k++){
         var r = rides[k];
-        rideHtml += '<tr><td>'+esc(r.date||"")+'</td><td>'+esc(r.time||"")+'</td><td>'+esc(r.title||"")+'</td><td class="muted">'+esc(r.location||"")+'</td></tr>';
+        rideHtml += '<tr>' +
+          '<td>'+esc(r.pretty_date || r.date || "")+'</td>' +
+          '<td>'+esc(r.title || "")+'</td>' +
+          '<td class="muted">'+esc(r.location || "")+'</td>' +
+          '<td class="muted">'+esc(r.notes || "")+'</td>' +
+        '</tr>';
       }
     }
     ridesTbl.innerHTML = rideHtml;
@@ -120,7 +129,7 @@
     var s = document.createElement("script");
     s.src = API_EXEC + "?mode=board_jsonp&cb=SGMC_CB&_=" + Date.now();
     s.onerror = function(){
-      render({ok:false,error:"JSONP load failed (host blocked the script request)"});
+      render({ok:false,error:"JSONP load failed"});
     };
     document.head.appendChild(s);
   })();
