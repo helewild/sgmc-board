@@ -38,6 +38,14 @@
         <tr><td colspan="3" class="muted">Loading…</td></tr>
       </table>
     </div>
+
+    <div class="card">
+      <div style="font-size:15px;margin-bottom:8px">Ride Outs</div>
+      <table id="ridesTbl">
+        <tr><th>Date</th><th>Time</th><th>Title</th><th class="muted">Location</th></tr>
+        <tr><td colspan="4" class="muted">Loading…</td></tr>
+      </table>
+    </div>
   </div>
 
   <div id="status" class="muted" style="margin-top:10px">Loading…</div>
@@ -55,17 +63,20 @@
   function render(data){
     var rosterTbl = document.getElementById("rosterTbl");
     var leadTbl = document.getElementById("leadTbl");
+    var ridesTbl = document.getElementById("ridesTbl");
     var status = document.getElementById("status");
 
     if(!data || !data.ok){
       rosterTbl.innerHTML = '<tr><th>Role</th><th>Name</th><th class="muted">Region</th></tr><tr><td colspan="3" class="err">Error loading</td></tr>';
       leadTbl.innerHTML = '<tr><th>Points</th><th>Name</th><th class="muted">Role</th></tr><tr><td colspan="3" class="err">Error loading</td></tr>';
+      ridesTbl.innerHTML = '<tr><th>Date</th><th>Time</th><th>Title</th><th class="muted">Location</th></tr><tr><td colspan="4" class="err">Error loading</td></tr>';
       status.innerHTML = '<span class="err">API error:</span> ' + esc(data && data.error ? data.error : "Unknown");
       return;
     }
 
     var rr = data.roster || [];
     var ll = data.leaderboard || [];
+    var rides = data.rides || [];
 
     var rHtml = '<tr><th>Role</th><th>Name</th><th class="muted">Region</th></tr>';
     if(rr.length === 0){
@@ -89,18 +100,27 @@
     }
     leadTbl.innerHTML = lHtml;
 
+    var rideHtml = '<tr><th>Date</th><th>Time</th><th>Title</th><th class="muted">Location</th></tr>';
+    if(rides.length === 0){
+      rideHtml += '<tr><td colspan="4" class="muted">No rides scheduled</td></tr>';
+    } else {
+      for(var k=0;k<rides.length;k++){
+        var r = rides[k];
+        rideHtml += '<tr><td>'+esc(r.date||"")+'</td><td>'+esc(r.time||"")+'</td><td>'+esc(r.title||"")+'</td><td class="muted">'+esc(r.location||"")+'</td></tr>';
+      }
+    }
+    ridesTbl.innerHTML = rideHtml;
+
     status.textContent = "Updated " + (data.now || "");
   }
 
-  // JSONP callback name
   window.SGMC_CB = function(payload){ render(payload); };
 
-  // Load via JSONP (no CORS)
   (function(){
     var s = document.createElement("script");
     s.src = API_EXEC + "?mode=board_jsonp&cb=SGMC_CB&_=" + Date.now();
     s.onerror = function(){
-      render({ok:false,error:"JSONP load failed (SL/host blocked the script request)"});
+      render({ok:false,error:"JSONP load failed (host blocked the script request)"});
     };
     document.head.appendChild(s);
   })();
