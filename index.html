@@ -1,330 +1,748 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>The Seventh Gear MC</title>
+  <title>The Seventh Gear MC - Control Panel</title>
+
   <style>
     :root{
-      --bg:#0b0b0b;
-      --panel:#111;
-      --panel2:#0f0f0f;
-      --text:#e8e8e8;
-      --muted:#9aa0a6;
-      --gold:#d8b35a;
-      --red:#ff5c5c;
-      --border:#232323;
-      --shadow:0 10px 30px rgba(0,0,0,.35);
-      --radius:14px;
+      --bg0:#060606;
+      --bg1:#0b0b0b;
+      --panel:#0f0f0f;
+      --panel2:#0c0c0c;
+      --line:rgba(255,255,255,.08);
+      --line2:rgba(255,255,255,.12);
+      --text:rgba(255,255,255,.88);
+      --muted:rgba(255,255,255,.58);
+      --muted2:rgba(255,255,255,.42);
+      --gold:#f0b84b;
+      --gold2:#d79a2b;
+      --red:#ff4a4a;
+
+      --radius:18px;
+      --shadow:0 18px 40px rgba(0,0,0,.55);
+      --shadow2:0 10px 24px rgba(0,0,0,.45);
+
+      /* Optional: drop your patch image URL here for watermark */
+      --watermark-url: none; /* example: url("patch.png") */
     }
+
     *{box-sizing:border-box}
+    html,body{height:100%}
     body{
       margin:0;
-      background:var(--bg);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
       color:var(--text);
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(1200px 600px at 50% -10%, rgba(240,184,75,.10), transparent 60%),
+        radial-gradient(900px 700px at 10% 10%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(900px 700px at 90% 20%, rgba(255,255,255,.05), transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+      overflow-x:hidden;
     }
-    header{
-      padding:22px 26px 10px 26px;
-      font-weight:800;
-      letter-spacing:.5px;
-      color:var(--gold);
-      font-size:22px;
-    }
+
     .wrap{
-      padding:0 22px 26px 22px;
+      width:min(1200px, calc(100% - 48px));
+      margin:28px auto 54px;
     }
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap:18px;
-    }
-    .card{
-      background:linear-gradient(180deg,var(--panel),var(--panel2));
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
+
+    .topbar{
+      padding:22px 22px 18px;
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        radial-gradient(900px 240px at 50% 0%, rgba(240,184,75,.10), transparent 70%),
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.0));
+      box-shadow: var(--shadow);
+      position:relative;
       overflow:hidden;
-      min-height:170px;
     }
-    .card h2{
+
+    .topbar::before{
+      content:"";
+      position:absolute; inset:-80px -80px auto -80px;
+      height:200px;
+      background: radial-gradient(closest-side, rgba(255,255,255,.09), transparent 65%);
+      filter: blur(6px);
+      opacity:.55;
+      pointer-events:none;
+    }
+
+    .title{
+      font-weight:900;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      font-size: 34px;
+      line-height:1.05;
+      color: var(--gold);
+      text-shadow: 0 10px 30px rgba(0,0,0,.65);
       margin:0;
-      padding:16px 16px 10px 16px;
-      font-size:14px;
-      font-weight:800;
-      color:var(--text);
     }
-    table{
+
+    .subtitle{
+      margin:10px 0 0;
+      color: var(--muted);
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-size: 12px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .subdot{
+      width:5px; height:5px;
+      border-radius:99px;
+      background: rgba(240,184,75,.75);
+      box-shadow: 0 0 18px rgba(240,184,75,.25);
+    }
+
+    .divider{
+      margin-top:14px;
+      height:1px;
+      background: linear-gradient(90deg, transparent, rgba(240,184,75,.55), transparent);
+      position:relative;
+    }
+    .divider::after{
+      content:"";
+      position:absolute; left:50%; top:50%;
+      transform:translate(-50%,-50%);
+      width:10px; height:10px;
+      background: rgba(240,184,75,.9);
+      clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+      box-shadow: 0 0 22px rgba(240,184,75,.35);
+      opacity:.8;
+    }
+
+    .gridStats{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:14px;
+    }
+
+    .stat{
+      border:1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,0));
+      box-shadow: var(--shadow2);
+      padding:16px 16px 14px;
+      position:relative;
+      overflow:hidden;
+      transition: transform .18s ease, border-color .18s ease;
+    }
+    .stat:hover{
+      transform: translateY(-2px);
+      border-color: rgba(240,184,75,.28);
+    }
+    .stat::before{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        radial-gradient(380px 180px at 30% 0%, rgba(240,184,75,.11), transparent 60%),
+        radial-gradient(360px 260px at 90% 120%, rgba(255,255,255,.07), transparent 55%);
+      pointer-events:none;
+      opacity:.9;
+    }
+
+    .statNum{
+      position:relative;
+      font-weight:900;
+      letter-spacing:.02em;
+      font-size: 34px;
+      color: rgba(255,255,255,.92);
+      text-shadow: 0 12px 28px rgba(0,0,0,.65);
+    }
+    .statLabel{
+      position:relative;
+      margin-top:4px;
+      font-size: 12px;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      color: var(--muted);
+    }
+
+    .gridMain{
+      margin-top:16px;
+      display:grid;
+      grid-template-columns: 1.2fr 1.2fr .9fr;
+      gap:14px;
+      align-items:start;
+    }
+
+    .panel{
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        radial-gradient(800px 400px at 50% 0%, rgba(255,255,255,.05), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,0));
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+      position:relative;
+      min-height: 208px;
+      transition: transform .18s ease, border-color .18s ease;
+    }
+
+    .panel:hover{
+      transform: translateY(-2px);
+      border-color: rgba(240,184,75,.22);
+    }
+
+    .panel::after{
+      content:"";
+      position:absolute; inset:0;
+      background-image: var(--watermark-url);
+      background-size: 520px auto;
+      background-repeat:no-repeat;
+      background-position: 50% 65%;
+      opacity: .06;
+      filter: grayscale(1) contrast(1.1);
+      pointer-events:none;
+    }
+
+    .panelHead{
+      padding:14px 16px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom:1px solid var(--line);
+      position:relative;
+      z-index:1;
+      background: linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,0));
+    }
+
+    .panelTitle{
+      margin:0;
+      font-weight:800;
+      letter-spacing:.02em;
+      font-size: 14px;
+      text-transform:uppercase;
+      color: rgba(255,255,255,.90);
+    }
+
+    .panelTools{
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+
+    .btn{
+      appearance:none;
+      border:1px solid rgba(240,184,75,.25);
+      background: linear-gradient(180deg, rgba(240,184,75,.14), rgba(0,0,0,0));
+      color: rgba(255,255,255,.88);
+      padding:8px 10px;
+      border-radius: 12px;
+      font-weight:700;
+      letter-spacing:.04em;
+      font-size: 12px;
+      cursor:pointer;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+      box-shadow: 0 10px 24px rgba(0,0,0,.35);
+      position:relative;
+      z-index:1;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      border-color: rgba(240,184,75,.45);
+      background: linear-gradient(180deg, rgba(240,184,75,.18), rgba(0,0,0,0));
+    }
+    .btn:active{
+      transform: translateY(0px);
+    }
+
+    .table{
       width:100%;
       border-collapse:collapse;
-      font-size:13px;
+      position:relative;
+      z-index:1;
     }
-    thead th{
+
+    .table th{
       text-align:left;
-      padding:10px 16px;
-      color:var(--muted);
-      font-weight:700;
-      border-top:1px solid var(--border);
-      border-bottom:1px solid var(--border);
-    }
-    tbody td{
-      padding:10px 16px;
-      border-bottom:1px solid rgba(35,35,35,.7);
-      color:var(--text);
-    }
-    .gold{ color:var(--gold); font-weight:800; }
-    .muted{ color:var(--muted); }
-    .errorRow{
-      color:var(--red);
-      font-weight:700;
-    }
-    .footerErr{
-      margin-top:10px;
-      padding:10px 6px 0 6px;
-      color:var(--red);
+      font-size:12px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color: var(--gold);
       font-weight:800;
-      font-size:14px;
+      padding:10px 16px;
+      border-bottom:1px solid var(--line);
     }
-    .footerErr span{
-      font-weight:500;
-      color:var(--muted);
-      margin-left:6px;
+
+    .table td{
+      padding:12px 16px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      color: rgba(255,255,255,.84);
+      font-size: 13px;
     }
-    @media (max-width: 1100px){
-      .grid{ grid-template-columns:1fr; }
+
+    .table tr:hover td{
+      background: rgba(255,255,255,.03);
+    }
+
+    .empty{
+      padding:18px 16px 16px;
+      color: var(--muted2);
+      font-size: 13px;
+      position:relative;
+      z-index:1;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.04em;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      color: rgba(255,255,255,.86);
+      white-space:nowrap;
+    }
+
+    .bPresident{ border-color: rgba(255,74,74,.25); background: rgba(255,74,74,.08); }
+    .bVP{ border-color: rgba(173,91,255,.24); background: rgba(173,91,255,.08); }
+    .bRoad{ border-color: rgba(255,159,66,.25); background: rgba(255,159,66,.08); }
+    .bEnforcer{ border-color: rgba(190,210,220,.22); background: rgba(190,210,220,.08); }
+    .bFull{ border-color: rgba(240,184,75,.28); background: rgba(240,184,75,.10); }
+    .bProspect{ border-color: rgba(90,165,255,.25); background: rgba(90,165,255,.10); }
+    .bHang{ border-color: rgba(255,255,255,.16); background: rgba(255,255,255,.05); color: rgba(255,255,255,.78); }
+
+    .actions{
+      padding:12px 12px 10px;
+      position:relative;
+      z-index:1;
+    }
+
+    .actionBtn{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:12px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:
+        radial-gradient(360px 80px at 20% 0%, rgba(240,184,75,.12), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,0));
+      color: rgba(255,255,255,.90);
+      font-weight:850;
+      letter-spacing:.03em;
+      cursor:pointer;
+      transition: transform .12s ease, border-color .12s ease;
+      box-shadow: 0 10px 22px rgba(0,0,0,.35);
+    }
+    .actionBtn:hover{
+      transform: translateY(-1px);
+      border-color: rgba(240,184,75,.35);
+    }
+
+    .actionMeta{
+      color: var(--muted);
+      font-weight:750;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      font-size: 11px;
+    }
+
+    .activity{
+      margin-top:10px;
+      border-top:1px solid var(--line);
+      padding:12px 14px 14px;
+      position:relative;
+      z-index:1;
+    }
+    .activity h4{
+      margin:0 0 10px;
+      font-weight:900;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      font-size: 12px;
+      color: rgba(255,255,255,.86);
+    }
+    .activity ul{
+      list-style:none;
+      margin:0;
+      padding:0;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .activity li{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      color: rgba(255,255,255,.82);
+      font-size: 13px;
+      line-height:1.25;
+    }
+    .bullet{
+      width:7px; height:7px;
+      border-radius:99px;
+      background: rgba(240,184,75,.85);
+      box-shadow: 0 0 16px rgba(240,184,75,.22);
+      margin-top:5px;
+      flex:0 0 auto;
+    }
+
+    .fadeIn{
+      animation: fade .25s ease both;
+    }
+    @keyframes fade{
+      from{opacity:0; transform: translateY(6px)}
+      to{opacity:1; transform: translateY(0)}
+    }
+
+    .foot{
+      margin-top:16px;
+      color: var(--muted2);
+      font-size: 12px;
+      letter-spacing:.04em;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .pill{
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      color: rgba(255,255,255,.72);
+    }
+
+    @media (max-width: 980px){
+      .gridStats{ grid-template-columns: repeat(2, 1fr); }
+      .gridMain{ grid-template-columns: 1fr; }
     }
   </style>
 </head>
+
 <body>
-  <header>THE SEVENTH GEAR MC</header>
+  <div class="wrap fadeIn">
+    <div class="topbar">
+      <h1 class="title">THE SEVENTH GEAR MC</h1>
 
-  <div class="wrap">
-    <div class="grid">
-      <section class="card">
-        <h2>Patch Tracking</h2>
-        <table>
+      <div class="subtitle">
+        <span>Moderate Estate</span><span class="subdot"></span>
+        <span>Public &amp; MC Territory</span><span class="subdot"></span>
+        <span>Established 2026</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="gridStats" id="statsRow">
+        <div class="stat">
+          <div class="statNum" id="statMembers">0</div>
+          <div class="statLabel">Total Members</div>
+        </div>
+        <div class="stat">
+          <div class="statNum" id="statActive">0</div>
+          <div class="statLabel">Active Today</div>
+        </div>
+        <div class="stat">
+          <div class="statNum" id="statPoints">0</div>
+          <div class="statLabel">Total Points</div>
+        </div>
+        <div class="stat">
+          <div class="statNum" id="statRides">0</div>
+          <div class="statLabel">Upcoming Rides</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gridMain">
+      <!-- Patch Tracking -->
+      <section class="panel" id="panelPatch">
+        <div class="panelHead">
+          <h3 class="panelTitle">Patch Tracking</h3>
+          <div class="panelTools">
+            <button class="btn" id="btnRefreshPatch">Refresh</button>
+          </div>
+        </div>
+
+        <table class="table" id="patchTable" style="display:none">
           <thead>
             <tr>
-              <th class="gold">Role</th>
-              <th class="gold">Name</th>
-              <th class="muted">Region</th>
+              <th style="width:180px">Role</th>
+              <th>Name</th>
+              <th style="width:180px">Region</th>
             </tr>
           </thead>
-          <tbody id="patchTbody">
-            <tr><td class="errorRow" colspan="3">Loading</td></tr>
-          </tbody>
+          <tbody id="patchTbody"></tbody>
         </table>
+
+        <div class="empty" id="patchEmpty">No patched members logged yet.</div>
       </section>
 
-      <section class="card">
-        <h2>Loyalty Leaderboard</h2>
-        <table>
+      <!-- Loyalty Leaderboard -->
+      <section class="panel" id="panelLoyalty">
+        <div class="panelHead">
+          <h3 class="panelTitle">Loyalty Leaderboard</h3>
+          <div class="panelTools">
+            <button class="btn" id="btnRefreshLoyalty">Refresh</button>
+          </div>
+        </div>
+
+        <table class="table" id="loyaltyTable" style="display:none">
           <thead>
             <tr>
-              <th class="gold">Points</th>
-              <th class="gold">Name</th>
-              <th class="muted">Role</th>
+              <th style="width:140px">Points</th>
+              <th>Name</th>
+              <th style="width:180px">Role</th>
             </tr>
           </thead>
-          <tbody id="lbTbody">
-            <tr><td class="errorRow" colspan="3">Loading</td></tr>
-          </tbody>
+          <tbody id="loyaltyTbody"></tbody>
         </table>
+
+        <div class="empty" id="loyaltyEmpty">No loyalty activity recorded.</div>
       </section>
 
-      <section class="card">
-        <h2>Ride Outs</h2>
-        <table>
+      <!-- Quick Actions + Activity -->
+      <section class="panel" id="panelQuick">
+        <div class="panelHead">
+          <h3 class="panelTitle">Quick Actions</h3>
+          <div class="panelTools">
+            <button class="btn" id="btnOpenSettings">Settings</button>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="actionBtn" id="actAddMember">
+            <span>Add Member</span>
+            <span class="actionMeta">Members</span>
+          </button>
+          <div style="height:10px"></div>
+
+          <button class="actionBtn" id="actScheduleRide">
+            <span>Schedule Ride</span>
+            <span class="actionMeta">Ride Outs</span>
+          </button>
+          <div style="height:10px"></div>
+
+          <button class="actionBtn" id="actAwardPoints">
+            <span>Award Points</span>
+            <span class="actionMeta">Loyalty</span>
+          </button>
+          <div style="height:10px"></div>
+
+          <button class="actionBtn" id="actViewApps">
+            <span>View Applications</span>
+            <span class="actionMeta">Recruitment</span>
+          </button>
+
+          <div class="activity">
+            <h4>Recent Activity</h4>
+            <ul id="activityList"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Ride Outs -->
+      <section class="panel" id="panelRides" style="grid-column: 1 / span 2;">
+        <div class="panelHead">
+          <h3 class="panelTitle">Ride Outs</h3>
+          <div class="panelTools">
+            <button class="btn" id="btnRefreshRides">Refresh</button>
+            <button class="btn" id="btnNewRide">New Ride</button>
+          </div>
+        </div>
+
+        <table class="table" id="ridesTable" style="display:none">
           <thead>
             <tr>
-              <th class="gold">Date</th>
-              <th class="gold">Title</th>
-              <th class="muted">Location</th>
-              <th class="muted">Notes</th>
+              <th style="width:140px">Date</th>
+              <th>Title</th>
+              <th style="width:200px">Location</th>
+              <th style="width:240px">Notes</th>
             </tr>
           </thead>
-          <tbody id="rideTbody">
-            <tr><td class="errorRow" colspan="4">Loading</td></tr>
-          </tbody>
+          <tbody id="ridesTbody"></tbody>
         </table>
+
+        <div class="empty" id="ridesEmpty">No scheduled ride outs.</div>
       </section>
     </div>
 
-    <div id="apiErr" class="footerErr" style="display:none;">
-      API error <span id="apiErrMsg"></span>
+    <div class="foot">
+      <span class="pill" id="lastUpdated">Last updated: never</span>
+      <span class="pill">The Seventh Gear MC Control Panel</span>
     </div>
   </div>
 
   <script>
-    // Set these two
-    const API_URL = "https://script.google.com/macros/s/AKfycbzBVmCshhIrFYyOwpAW3tHyM_T1ROZWuYkyorEkHAo4cXfJcaw0ui3ITQnkzLkqXVE3Ww/exec";
-    const TOKEN_VALUE = "Apples123";
+    // Demo data (replace with your API calls)
+    const demo = {
+      stats: { members: 32, activeToday: 9, totalPoints: 870, upcomingRides: 0 },
+      patchTracking: [
+        // { role:"Full Patch", name:"Glynn Spad", region:"RicoLand" },
+      ],
+      loyalty: [
+        // { points: 120, name:"Glynn Spad", role:"Enforcer" },
+      ],
+      rides: [
+        // { date:"2026-02-28", title:"Highway Run", location:"RicoLand", notes:"Meet at clubhouse 8pm" },
+      ],
+      activity: [
+        { text: "Glynn Spad earned 5 points" },
+        { text: "Ride Out: Highway Run created" },
+        { text: "New Prospect: Alex Reeves" },
+      ]
+    };
 
-    function esc(s){
-      return String(s ?? "").replace(/[&<>"']/g, c => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-      })[c]);
+    function roleBadge(role){
+      const r = (role || "").toLowerCase();
+      let cls = "";
+      if(r.includes("president")) cls = "bPresident";
+      else if(r.includes("vice") || r === "vp") cls = "bVP";
+      else if(r.includes("road")) cls = "bRoad";
+      else if(r.includes("enforcer")) cls = "bEnforcer";
+      else if(r.includes("full")) cls = "bFull";
+      else if(r.includes("prospect")) cls = "bProspect";
+      else if(r.includes("hang")) cls = "bHang";
+      return `<span class="badge ${cls}">${escapeHtml(role || "")}</span>`;
     }
 
-    function showApiError(msg){
-      const box = document.getElementById("apiErr");
-      const m = document.getElementById("apiErrMsg");
-      m.textContent = msg || "Unknown error";
-      box.style.display = "block";
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
     }
 
-    function clearApiError(){
-      document.getElementById("apiErr").style.display = "none";
-      document.getElementById("apiErrMsg").textContent = "";
+    function setStats(s){
+      document.getElementById("statMembers").textContent = s.members ?? 0;
+      document.getElementById("statActive").textContent = s.activeToday ?? 0;
+      document.getElementById("statPoints").textContent = s.totalPoints ?? 0;
+      document.getElementById("statRides").textContent = s.upcomingRides ?? 0;
     }
 
-    // JSONP loader with timeout and hard failure reporting
-    function jsonp(url, params, timeoutMs){
-      return new Promise((resolve, reject) => {
-        const cbName = "cb_" + Math.random().toString(36).slice(2);
-        const qs = new URLSearchParams(params || {});
-        qs.set("callback", cbName);
+    function renderPatch(rows){
+      const table = document.getElementById("patchTable");
+      const empty = document.getElementById("patchEmpty");
+      const tbody = document.getElementById("patchTbody");
+      tbody.innerHTML = "";
 
-        const script = document.createElement("script");
-        let done = false;
+      if(!rows || rows.length === 0){
+        table.style.display = "none";
+        empty.style.display = "block";
+        return;
+      }
+      rows.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${roleBadge(r.role)}</td>
+          <td>${escapeHtml(r.name)}</td>
+          <td>${escapeHtml(r.region)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      empty.style.display = "none";
+      table.style.display = "table";
+    }
 
-        const timer = setTimeout(() => {
-          if (done) return;
-          done = true;
-          cleanup();
-          reject(new Error("JSONP timeout"));
-        }, timeoutMs || 12000);
+    function renderLoyalty(rows){
+      const table = document.getElementById("loyaltyTable");
+      const empty = document.getElementById("loyaltyEmpty");
+      const tbody = document.getElementById("loyaltyTbody");
+      tbody.innerHTML = "";
 
-        function cleanup(){
-          clearTimeout(timer);
-          try { delete window[cbName]; } catch(e) { window[cbName] = undefined; }
-          if (script && script.parentNode) script.parentNode.removeChild(script);
-        }
+      if(!rows || rows.length === 0){
+        table.style.display = "none";
+        empty.style.display = "block";
+        return;
+      }
+      rows.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${escapeHtml(r.points)}</td>
+          <td>${escapeHtml(r.name)}</td>
+          <td>${roleBadge(r.role)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      empty.style.display = "none";
+      table.style.display = "table";
+    }
 
-        window[cbName] = (data) => {
-          if (done) return;
-          done = true;
-          cleanup();
-          resolve(data);
-        };
+    function renderRides(rows){
+      const table = document.getElementById("ridesTable");
+      const empty = document.getElementById("ridesEmpty");
+      const tbody = document.getElementById("ridesTbody");
+      tbody.innerHTML = "";
 
-        script.onerror = () => {
-          if (done) return;
-          done = true;
-          cleanup();
-          reject(new Error("JSONP load failed"));
-        };
+      if(!rows || rows.length === 0){
+        table.style.display = "none";
+        empty.style.display = "block";
+        return;
+      }
+      rows.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${escapeHtml(r.date)}</td>
+          <td>${escapeHtml(r.title)}</td>
+          <td>${escapeHtml(r.location)}</td>
+          <td>${escapeHtml(r.notes)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      empty.style.display = "none";
+      table.style.display = "table";
+    }
 
-        script.src = url + (url.includes("?") ? "&" : "?") + qs.toString();
-        document.head.appendChild(script);
+    function renderActivity(items){
+      const ul = document.getElementById("activityList");
+      ul.innerHTML = "";
+      (items || []).forEach(a => {
+        const li = document.createElement("li");
+        li.innerHTML = `<span class="bullet"></span><span>${escapeHtml(a.text)}</span>`;
+        ul.appendChild(li);
       });
     }
 
-    async function loadPanel(action){
-      const baseParams = { token: TOKEN_VALUE, action: action };
-      return await jsonp(API_URL, baseParams, 12000);
+    function setUpdated(){
+      const d = new Date();
+      document.getElementById("lastUpdated").textContent =
+        "Last updated: " + d.toLocaleString();
     }
 
-    function setErrorRow(tbodyId, colspan, text){
-      const tb = document.getElementById(tbodyId);
-      tb.innerHTML = `<tr><td class="errorRow" colspan="${colspan}">${esc(text)}</td></tr>`;
+    function loadAll(){
+      setStats(demo.stats);
+      renderPatch(demo.patchTracking);
+      renderLoyalty(demo.loyalty);
+      renderRides(demo.rides);
+      renderActivity(demo.activity);
+      setUpdated();
     }
 
-    function renderPatches(data){
-      const tb = document.getElementById("patchTbody");
-      if (!data || !data.ok){
-        setErrorRow("patchTbody", 3, (data && data.error) ? data.error : "Error loading");
-        return;
-      }
-      if (!data.items || !data.items.length){
-        setErrorRow("patchTbody", 3, "No records");
-        return;
-      }
-      tb.innerHTML = data.items.map(it => `
-        <tr>
-          <td class="gold">${esc(it.role)}</td>
-          <td>${esc(it.name)}</td>
-          <td class="muted">${esc(it.region)}</td>
-        </tr>
-      `).join("");
-    }
+    // Buttons (wire these to your real UI)
+    document.getElementById("btnRefreshPatch").addEventListener("click", loadAll);
+    document.getElementById("btnRefreshLoyalty").addEventListener("click", loadAll);
+    document.getElementById("btnRefreshRides").addEventListener("click", loadAll);
 
-    function renderLeaderboard(data){
-      const tb = document.getElementById("lbTbody");
-      if (!data || !data.ok){
-        setErrorRow("lbTbody", 3, (data && data.error) ? data.error : "Error loading");
-        return;
-      }
-      if (!data.items || !data.items.length){
-        setErrorRow("lbTbody", 3, "No records");
-        return;
-      }
-      tb.innerHTML = data.items.map(it => `
-        <tr>
-          <td class="gold">${esc(it.points)}</td>
-          <td>${esc(it.name)}</td>
-          <td class="muted">${esc(it.role)}</td>
-        </tr>
-      `).join("");
-    }
+    document.getElementById("btnNewRide").addEventListener("click", () => {
+      alert("Hook this to your New Ride form");
+    });
 
-    function renderRides(data){
-      const tb = document.getElementById("rideTbody");
-      if (!data || !data.ok){
-        setErrorRow("rideTbody", 4, (data && data.error) ? data.error : "Error loading");
-        return;
-      }
-      if (!data.items || !data.items.length){
-        setErrorRow("rideTbody", 4, "No records");
-        return;
-      }
-      tb.innerHTML = data.items.map(it => `
-        <tr>
-          <td class="gold">${esc(it.date)}</td>
-          <td>${esc(it.title)}</td>
-          <td class="muted">${esc(it.location)}</td>
-          <td class="muted">${esc(it.notes)}</td>
-        </tr>
-      `).join("");
-    }
+    document.getElementById("btnOpenSettings").addEventListener("click", () => {
+      alert("Hook this to your Settings pane");
+    });
 
-    async function boot(){
-      clearApiError();
+    document.getElementById("actAddMember").addEventListener("click", () => alert("Hook to Add Member"));
+    document.getElementById("actScheduleRide").addEventListener("click", () => alert("Hook to Schedule Ride"));
+    document.getElementById("actAwardPoints").addEventListener("click", () => alert("Hook to Award Points"));
+    document.getElementById("actViewApps").addEventListener("click", () => alert("Hook to View Applications"));
 
-      // Default loading rows
-      setErrorRow("patchTbody", 3, "Loading");
-      setErrorRow("lbTbody", 3, "Loading");
-      setErrorRow("rideTbody", 4, "Loading");
-
-      try{
-        const [patches, leaderboard, rides] = await Promise.all([
-          loadPanel("patches"),
-          loadPanel("leaderboard"),
-          loadPanel("rides")
-        ]);
-
-        renderPatches(patches);
-        renderLeaderboard(leaderboard);
-        renderRides(rides);
-
-        // If any panel failed, show the footer api error too
-        const err = (!patches.ok && patches.error) ? patches.error
-                  : (!leaderboard.ok && leaderboard.error) ? leaderboard.error
-                  : (!rides.ok && rides.error) ? rides.error
-                  : "";
-
-        if (err) showApiError(err);
-
-      } catch(e){
-        // This is the exact case you are seeing
-        showApiError(e.message || "JSONP load failed");
-        setErrorRow("patchTbody", 3, "Error loading");
-        setErrorRow("lbTbody", 3, "Error loading");
-        setErrorRow("rideTbody", 4, "Error loading");
-      }
-    }
-
-    boot();
+    loadAll();
   </script>
 </body>
 </html>
