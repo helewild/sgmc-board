@@ -1,139 +1,330 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="refresh" content="60">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>THE SEVENTH GEAR MC</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>The Seventh Gear MC</title>
   <style>
-    body{margin:0;background:#0b0b0b;color:#e7d6b0;font-family:Arial}
-    .wrap{padding:16px}
-    h1{font-size:20px;margin:0 0 10px 0;letter-spacing:1px}
-    .row{display:flex;gap:16px;flex-wrap:wrap}
-    .card{background:#121212;border:1px solid #2a2a2a;border-radius:12px;padding:12px;min-width:320px;flex:1}
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:8px 6px;border-bottom:1px solid #2a2a2a;font-size:13px;vertical-align:top}
-    th{color:#f0c86a;text-align:left}
-    .muted{color:#9a9a9a}
-    .err{color:#ffb3b3}
+    :root{
+      --bg:#0b0b0b;
+      --panel:#111;
+      --panel2:#0f0f0f;
+      --text:#e8e8e8;
+      --muted:#9aa0a6;
+      --gold:#d8b35a;
+      --red:#ff5c5c;
+      --border:#232323;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    }
+    header{
+      padding:22px 26px 10px 26px;
+      font-weight:800;
+      letter-spacing:.5px;
+      color:var(--gold);
+      font-size:22px;
+    }
+    .wrap{
+      padding:0 22px 26px 22px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap:18px;
+    }
+    .card{
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      min-height:170px;
+    }
+    .card h2{
+      margin:0;
+      padding:16px 16px 10px 16px;
+      font-size:14px;
+      font-weight:800;
+      color:var(--text);
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+    }
+    thead th{
+      text-align:left;
+      padding:10px 16px;
+      color:var(--muted);
+      font-weight:700;
+      border-top:1px solid var(--border);
+      border-bottom:1px solid var(--border);
+    }
+    tbody td{
+      padding:10px 16px;
+      border-bottom:1px solid rgba(35,35,35,.7);
+      color:var(--text);
+    }
+    .gold{ color:var(--gold); font-weight:800; }
+    .muted{ color:var(--muted); }
+    .errorRow{
+      color:var(--red);
+      font-weight:700;
+    }
+    .footerErr{
+      margin-top:10px;
+      padding:10px 6px 0 6px;
+      color:var(--red);
+      font-weight:800;
+      font-size:14px;
+    }
+    .footerErr span{
+      font-weight:500;
+      color:var(--muted);
+      margin-left:6px;
+    }
+    @media (max-width: 1100px){
+      .grid{ grid-template-columns:1fr; }
+    }
   </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>THE SEVENTH GEAR MC</h1>
+  <header>THE SEVENTH GEAR MC</header>
 
-  <div class="row">
-    <div class="card">
-      <div style="font-size:15px;margin-bottom:8px">Patch Tracking</div>
-      <table id="rosterTbl">
-        <tr><th>Role</th><th>Name</th><th class="muted">Region</th></tr>
-        <tr><td colspan="3" class="muted">Loading…</td></tr>
-      </table>
+  <div class="wrap">
+    <div class="grid">
+      <section class="card">
+        <h2>Patch Tracking</h2>
+        <table>
+          <thead>
+            <tr>
+              <th class="gold">Role</th>
+              <th class="gold">Name</th>
+              <th class="muted">Region</th>
+            </tr>
+          </thead>
+          <tbody id="patchTbody">
+            <tr><td class="errorRow" colspan="3">Loading</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card">
+        <h2>Loyalty Leaderboard</h2>
+        <table>
+          <thead>
+            <tr>
+              <th class="gold">Points</th>
+              <th class="gold">Name</th>
+              <th class="muted">Role</th>
+            </tr>
+          </thead>
+          <tbody id="lbTbody">
+            <tr><td class="errorRow" colspan="3">Loading</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card">
+        <h2>Ride Outs</h2>
+        <table>
+          <thead>
+            <tr>
+              <th class="gold">Date</th>
+              <th class="gold">Title</th>
+              <th class="muted">Location</th>
+              <th class="muted">Notes</th>
+            </tr>
+          </thead>
+          <tbody id="rideTbody">
+            <tr><td class="errorRow" colspan="4">Loading</td></tr>
+          </tbody>
+        </table>
+      </section>
     </div>
 
-    <div class="card">
-      <div style="font-size:15px;margin-bottom:8px">Loyalty Leaderboard</div>
-      <table id="leadTbl">
-        <tr><th>Points</th><th>Name</th><th class="muted">Role</th></tr>
-        <tr><td colspan="3" class="muted">Loading…</td></tr>
-      </table>
-    </div>
-
-    <div class="card">
-      <div style="font-size:15px;margin-bottom:8px">Ride Outs</div>
-      <table id="ridesTbl">
-        <tr>
-          <th>Date</th>
-          <th>Title</th>
-          <th class="muted">Location</th>
-          <th class="muted">Notes</th>
-        </tr>
-        <tr><td colspan="4" class="muted">Loading…</td></tr>
-      </table>
+    <div id="apiErr" class="footerErr" style="display:none;">
+      API error <span id="apiErrMsg"></span>
     </div>
   </div>
 
-  <div id="status" class="muted" style="margin-top:10px">Loading…</div>
-</div>
+  <script>
+    // Set these two
+    const API_URL = "https://script.google.com/macros/s/AKfycbzBVmCshhIrFYyOwpAW3tHyM_T1ROZWuYkyorEkHAo4cXfJcaw0ui3ITQnkzLkqXVE3Ww/exec";
+    const TOKEN_VALUE = "Apples123";
 
-<script>
-  var API_EXEC = "https://script.google.com/macros/s/AKfycbzBVmCshhIrFYyOwpAW3tHyM_T1ROZWuYkyorEkHAo4cXfJcaw0ui3ITQnkzLkqXVE3Ww/exec";
-
-  function esc(s){
-    s = String(s==null?"":s);
-    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
-  }
-
-  function render(data){
-    var rosterTbl = document.getElementById("rosterTbl");
-    var leadTbl = document.getElementById("leadTbl");
-    var ridesTbl = document.getElementById("ridesTbl");
-    var status = document.getElementById("status");
-
-    if(!data || !data.ok){
-      rosterTbl.innerHTML = '<tr><th>Role</th><th>Name</th><th class="muted">Region</th></tr><tr><td colspan="3" class="err">Error loading</td></tr>';
-      leadTbl.innerHTML = '<tr><th>Points</th><th>Name</th><th class="muted">Role</th></tr><tr><td colspan="3" class="err">Error loading</td></tr>';
-      ridesTbl.innerHTML = '<tr><th>Date</th><th>Title</th><th class="muted">Location</th><th class="muted">Notes</th></tr><tr><td colspan="4" class="err">Error loading</td></tr>';
-      status.innerHTML = '<span class="err">API error:</span> ' + esc(data && data.error ? data.error : "Unknown");
-      return;
+    function esc(s){
+      return String(s ?? "").replace(/[&<>"']/g, c => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      })[c]);
     }
 
-    var rr = data.roster || [];
-    var ll = data.leaderboard || [];
-    var rides = data.rides || [];
+    function showApiError(msg){
+      const box = document.getElementById("apiErr");
+      const m = document.getElementById("apiErrMsg");
+      m.textContent = msg || "Unknown error";
+      box.style.display = "block";
+    }
 
-    var rHtml = '<tr><th>Role</th><th>Name</th><th class="muted">Region</th></tr>';
-    if(rr.length === 0){
-      rHtml += '<tr><td colspan="3" class="muted">No members yet</td></tr>';
-    } else {
-      for(var i=0;i<rr.length;i++){
-        var x = rr[i];
-        rHtml += '<tr><td>'+esc(x.role)+'</td><td>'+esc(x.name||x.uuid)+'</td><td class="muted">'+esc(x.region||"")+'</td></tr>';
+    function clearApiError(){
+      document.getElementById("apiErr").style.display = "none";
+      document.getElementById("apiErrMsg").textContent = "";
+    }
+
+    // JSONP loader with timeout and hard failure reporting
+    function jsonp(url, params, timeoutMs){
+      return new Promise((resolve, reject) => {
+        const cbName = "cb_" + Math.random().toString(36).slice(2);
+        const qs = new URLSearchParams(params || {});
+        qs.set("callback", cbName);
+
+        const script = document.createElement("script");
+        let done = false;
+
+        const timer = setTimeout(() => {
+          if (done) return;
+          done = true;
+          cleanup();
+          reject(new Error("JSONP timeout"));
+        }, timeoutMs || 12000);
+
+        function cleanup(){
+          clearTimeout(timer);
+          try { delete window[cbName]; } catch(e) { window[cbName] = undefined; }
+          if (script && script.parentNode) script.parentNode.removeChild(script);
+        }
+
+        window[cbName] = (data) => {
+          if (done) return;
+          done = true;
+          cleanup();
+          resolve(data);
+        };
+
+        script.onerror = () => {
+          if (done) return;
+          done = true;
+          cleanup();
+          reject(new Error("JSONP load failed"));
+        };
+
+        script.src = url + (url.includes("?") ? "&" : "?") + qs.toString();
+        document.head.appendChild(script);
+      });
+    }
+
+    async function loadPanel(action){
+      const baseParams = { token: TOKEN_VALUE, action: action };
+      return await jsonp(API_URL, baseParams, 12000);
+    }
+
+    function setErrorRow(tbodyId, colspan, text){
+      const tb = document.getElementById(tbodyId);
+      tb.innerHTML = `<tr><td class="errorRow" colspan="${colspan}">${esc(text)}</td></tr>`;
+    }
+
+    function renderPatches(data){
+      const tb = document.getElementById("patchTbody");
+      if (!data || !data.ok){
+        setErrorRow("patchTbody", 3, (data && data.error) ? data.error : "Error loading");
+        return;
+      }
+      if (!data.items || !data.items.length){
+        setErrorRow("patchTbody", 3, "No records");
+        return;
+      }
+      tb.innerHTML = data.items.map(it => `
+        <tr>
+          <td class="gold">${esc(it.role)}</td>
+          <td>${esc(it.name)}</td>
+          <td class="muted">${esc(it.region)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderLeaderboard(data){
+      const tb = document.getElementById("lbTbody");
+      if (!data || !data.ok){
+        setErrorRow("lbTbody", 3, (data && data.error) ? data.error : "Error loading");
+        return;
+      }
+      if (!data.items || !data.items.length){
+        setErrorRow("lbTbody", 3, "No records");
+        return;
+      }
+      tb.innerHTML = data.items.map(it => `
+        <tr>
+          <td class="gold">${esc(it.points)}</td>
+          <td>${esc(it.name)}</td>
+          <td class="muted">${esc(it.role)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderRides(data){
+      const tb = document.getElementById("rideTbody");
+      if (!data || !data.ok){
+        setErrorRow("rideTbody", 4, (data && data.error) ? data.error : "Error loading");
+        return;
+      }
+      if (!data.items || !data.items.length){
+        setErrorRow("rideTbody", 4, "No records");
+        return;
+      }
+      tb.innerHTML = data.items.map(it => `
+        <tr>
+          <td class="gold">${esc(it.date)}</td>
+          <td>${esc(it.title)}</td>
+          <td class="muted">${esc(it.location)}</td>
+          <td class="muted">${esc(it.notes)}</td>
+        </tr>
+      `).join("");
+    }
+
+    async function boot(){
+      clearApiError();
+
+      // Default loading rows
+      setErrorRow("patchTbody", 3, "Loading");
+      setErrorRow("lbTbody", 3, "Loading");
+      setErrorRow("rideTbody", 4, "Loading");
+
+      try{
+        const [patches, leaderboard, rides] = await Promise.all([
+          loadPanel("patches"),
+          loadPanel("leaderboard"),
+          loadPanel("rides")
+        ]);
+
+        renderPatches(patches);
+        renderLeaderboard(leaderboard);
+        renderRides(rides);
+
+        // If any panel failed, show the footer api error too
+        const err = (!patches.ok && patches.error) ? patches.error
+                  : (!leaderboard.ok && leaderboard.error) ? leaderboard.error
+                  : (!rides.ok && rides.error) ? rides.error
+                  : "";
+
+        if (err) showApiError(err);
+
+      } catch(e){
+        // This is the exact case you are seeing
+        showApiError(e.message || "JSONP load failed");
+        setErrorRow("patchTbody", 3, "Error loading");
+        setErrorRow("lbTbody", 3, "Error loading");
+        setErrorRow("rideTbody", 4, "Error loading");
       }
     }
-    rosterTbl.innerHTML = rHtml;
 
-    var lHtml = '<tr><th>Points</th><th>Name</th><th class="muted">Role</th></tr>';
-    if(ll.length === 0){
-      lHtml += '<tr><td colspan="3" class="muted">No points yet</td></tr>';
-    } else {
-      for(var j=0;j<ll.length;j++){
-        var y = ll[j];
-        lHtml += '<tr><td>'+Number(y.points||0)+'</td><td>'+esc(y.name||y.uuid)+'</td><td class="muted">'+esc(y.role||"")+'</td></tr>';
-      }
-    }
-    leadTbl.innerHTML = lHtml;
-
-    var rideHtml = '<tr><th>Date</th><th>Title</th><th class="muted">Location</th><th class="muted">Notes</th></tr>';
-    if(rides.length === 0){
-      rideHtml += '<tr><td colspan="4" class="muted">No rides scheduled</td></tr>';
-    } else {
-      for(var k=0;k<rides.length;k++){
-        var r = rides[k];
-        rideHtml += '<tr>' +
-          '<td>'+esc(r.pretty_date || r.date || "")+'</td>' +
-          '<td>'+esc(r.title || "")+'</td>' +
-          '<td class="muted">'+esc(r.location || "")+'</td>' +
-          '<td class="muted">'+esc(r.notes || "")+'</td>' +
-        '</tr>';
-      }
-    }
-    ridesTbl.innerHTML = rideHtml;
-
-    status.textContent = "Updated " + (data.now || "");
-  }
-
-  window.SGMC_CB = function(payload){ render(payload); };
-
-  (function(){
-    var s = document.createElement("script");
-    s.src = API_EXEC + "?mode=board_jsonp&cb=SGMC_CB&_=" + Date.now();
-    s.onerror = function(){
-      render({ok:false,error:"JSONP load failed"});
-    };
-    document.head.appendChild(s);
-  })();
-</script>
-
+    boot();
+  </script>
 </body>
 </html>
